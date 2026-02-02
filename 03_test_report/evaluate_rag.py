@@ -17,6 +17,8 @@ sys.path.append(str(root_path / "src"))
 from src.rag.analyst_chat import AnalystChatbot
 
 try:
+    # To fix TypeError: All metrics must be initialised metric objects
+    # We revert to the simple import which provides instantiated metrics by default in this version.
     from ragas import evaluate
     from ragas.metrics import (
         faithfulness,

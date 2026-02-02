@@ -24,11 +24,15 @@ class DataRetriever:
         self.finnhub = finnhub
 
     def get_company_context_parallel(
-        self, ticker: str, include_finnhub: bool = True, include_rag: bool = True
+        self,
+        ticker: str,
+        include_finnhub: bool = True,
+        include_rag: bool = True,
+        query: str = None,
     ) -> Dict:
         """
         여러 소스에서 기업 데이터를 병렬로 수집합니다.
-        기존 순차 호출 방식보다 수 초 이상 빠릅니다.
+        query가 제공되면 해당 질문에 대한 RAG 검색을 수행합니다.
         """
         ticker = ticker.upper()
         results = {}
@@ -39,13 +43,21 @@ class DataRetriever:
             info_future = executor.submit(self._fetch_company_info, ticker)
             rel_future = executor.submit(self._fetch_relationships, ticker)
 
-            # 2. RAG 컨텍스트 (VectorStore)
+            # 2. RAG 컨텍스트 (VectorStore - Hybrid Search + Client-side Filtering)
             rag_future = None
             if include_rag and self.vector_store:
+                # 쿼리가 있으면 사용, 없으면 기본값
+                search_query = (
+                    f"{query} ({ticker})"
+                    if query
+                    else f"Latest business overview and risks for {ticker}"
+                )
+
+                # Filtering을 위해 더 많이 검색 (k=3 -> k=20)
                 rag_future = executor.submit(
                     self.vector_store.hybrid_search,
-                    f"Latest business overview and risks for {ticker}",
-                    k=3,
+                    search_query,
+                    k=20,
                 )
 
             # 3. 실시간 시세 및 지표 (Finnhub)
@@ -74,13 +86,24 @@ class DataRetriever:
 
             if rag_future:
                 try:
-                    docs = rag_future.result()
+                    raw_docs = rag_future.result() or []
+                    # Client-side Filtering by Ticker (Metadata)
+                    filtered_docs = [
+                        d
+                        for d in raw_docs
+                        if d.get("metadata", {}).get("ticker") == ticker
+                    ]
+                    # 만약 필터링 후 문서가 너무 적으면(0개), 필터 없이 상위 문서 사용 (Fallback)
+                    # 단, 점수가 너무 낮으면 제외하는 로직은 vector_store 내부에 있음
+                    final_docs = filtered_docs[:5] if filtered_docs else raw_docs[:2]
+
                     results["rag_context"] = (
-                        "\n".join([d.get("content", "")[:500] for d in docs])
-                        if docs
+                        "\n".join([d.get("content", "")[:1000] for d in final_docs])
+                        if final_docs
                         else ""
                     )
-                except Exception:
+                except Exception as e:
+                    logger.error(f"RAG context processing failed: {e}")
                     results["rag_context"] = ""
 
             if include_finnhub and self.finnhub:
