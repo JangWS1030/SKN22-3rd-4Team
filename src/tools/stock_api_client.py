@@ -53,7 +53,7 @@ class StockAPIClient:
 
         try:
             response = self.session.get(
-                f"{self.BASE_URL}/{endpoint}", params=params, timeout=10
+                f"{self.BASE_URL}/{endpoint}", params=params, timeout=3
             )
             response.raise_for_status()
             return response.json()

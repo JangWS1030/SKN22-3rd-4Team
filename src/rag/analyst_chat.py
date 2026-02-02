@@ -122,9 +122,10 @@ class AnalystChatbot(RAGBase):
             return "데이터 수집 모듈 미작동"
 
         logger.info(f"Building context for query: {query}, ticker: {ticker}")
-        all_data = self.data_retriever.get_company_context_parallel(
-            ticker, include_finnhub=True, include_rag=True
+        dataset_context = self.data_retriever.get_company_context_parallel(
+            ticker, include_finnhub=True, include_rag=True, query=query
         )
+        all_data = dataset_context
 
         context_parts = []
 

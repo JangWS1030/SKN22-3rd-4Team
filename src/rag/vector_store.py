@@ -144,13 +144,29 @@ class VectorStore:
                 {
                     "query_embedding": query_embedding,
                     "match_count": k,
-                    "match_threshold": 0.1,  # Threshold 낮춤 (0.5 -> 0.1)
+                    "match_threshold": 0.3,  # Threshold 조정 (사용자 요청: 0.3)
                 },
             ).execute()
 
             # 디버깅: 응답 데이터 로깅
             if not response.data:
-                logger.warning(f"No results from match_documents. Response: {response}")
+                logger.warning(
+                    f"No results from match_documents with threshold 0.3. Retrying without threshold."
+                )
+                # Fallback: Threshold 없이 상위 k개 강제 검색
+                response = self.supabase.rpc(
+                    "match_documents",
+                    {
+                        "query_embedding": query_embedding,
+                        "match_count": k,
+                        "match_threshold": 0.0,  # Threshold 제거 (Fallback)
+                    },
+                ).execute()
+
+            if not response.data:
+                logger.warning(
+                    f"Still no results from match_documents (Fallback). Response: {response}"
+                )
 
             # Format results
             documents = []
