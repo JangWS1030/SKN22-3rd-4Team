@@ -134,7 +134,7 @@ with st.sidebar.expander("⭐ 관심 기업", expanded=True):
                     st.rerun()
         st.caption(f"총 {len(st.session_state.watchlist)}개")
     else:
-        st.caption("위 입력창에 티커를 입력하세요\n(예: AAPL, MSFT, GOOGL)")
+        st.caption("위 입력창에 기업명/티커를 입력하세요\n(예: 애플, MSFT)")
 
 st.sidebar.markdown("---")
 
