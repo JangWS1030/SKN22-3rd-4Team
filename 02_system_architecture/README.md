@@ -37,7 +37,7 @@ graph TD
         Retriever -->|Live Price/News| Finnhub[📡 Finnhub API]
         Retriever -->|Market Info| Yahoo[📈 yfinance API]
         Retriever -->|Unknown Ticker| Tavily[🕵️ Tavily Search]
-        VectorDB <-->|Sync| SEC[📄 SEC 10-K/10-Q]
+        VectorDB <-->|Sync| SEC[📄 SEC 10-K]
     end
 
     Retriever -->|Aggregated Context| LLM[🧠 GPT-4.1-mini]
