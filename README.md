@@ -8,7 +8,7 @@
 
 ## 🙋‍♂️ 프로젝트 팀 구성 (Team Composition)
 
-| Role & Name | Responsibilities | Review |
+| Role & Name | Responsibilities | Comment |
 | :--- | :--- | :--- |
 | **이병재 (Team Leader)**<br><sub>PM / ARCHITECTURE / DB</sub><br>[@PracLee](https://github.com/PracLee) | • 프로젝트 기획 및 전체 구조(Architecture) 설계<br>• 재무 데이터베이스(DB) 모델링 및 설계<br>• 챗봇 추천 검색어 로직 구현<br>• 단위/통합 테스트 주도 및 품질 관리 | 이것저것 알아보면서 해서 재밌고 유익한 시간이였습니다. |
 | **장완식 (Core Dev)**<br><sub>RAG PIPELINE / UI/UX</sub><br>[@JangWS1030](https://github.com/JangWS1030) | • RAG 파이프라인(Chatbot) 핵심 로직 구현<br>• 로그인/인증 시스템 및 즐겨찾기 기능 개발<br>• DB 현황 모니터링 UI 및 PDF 리포트 수정<br>• 전반적인 UI/UX 개선 및 고도화 | AI는 마법이 아니라 공학임을 깨닫고, 데이터 기반의 집요한 검증과 디버깅으로 성능 한계를 극복하며 엔지니어링의 본질을 체득했습니다 |
