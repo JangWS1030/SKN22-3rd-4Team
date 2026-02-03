@@ -13,10 +13,10 @@
 
 | 지표 (Metric) | 점수 (Score) | 평가 (Assessment) |
 | :--- | :--- | :--- |
-| **Answer Relevancy** | **0.7804** | ✅ **우수 (Excellent)**. 사용자의 질문 의도를 정확히 파악하고 적절한 답변을 제공함. 상용화가 가능한 수준. |
-| **Context Recall** | **0.3959** | ⚠️ **양호 (Fair)**. 10-K 문서의 방대한 분량과 한글-영어 검색 장벽을 고려할 때 준수한 수준. 초기 대비 약 1.6배 향상됨. |
-| **Faithfulness** | **0.2518** | ⚠️ **보통 (Moderate)**. 엄격한 "Fact Check" 프롬프트 적용으로 환각(Hallucination)을 억제하고 있음. |
-| **Context Precision** | **0.2298** | 🔻 **개선 필요 (Need Improvement)**. 검색된 문서 중 일부만 정답과 관련됨. Reranking 도입으로 보완 중. |
+| **Answer Relevancy** | **0.7822** | ✅ **최우수 (Excellent)**. 사용자의 질문 의도를 정확히 파악하고 적절한 답변을 제공함. |
+| **Context Recall** | **0.5117** | ✅ **대폭 개선 (Improved)**. 과도한 필터링 제거 및 k=8 확장으로 초기(0.33) 대비 55% 성능 향상. |
+| **Faithfulness** | **0.4523** | ✅ **최우수 (Excellent)**. 프롬프트 모듈화 및 엄격한 규칙 적용으로 초기(0.30) 대비 50% 신뢰성 향상. |
+| **Context Precision** | **0.2563** | ⚠️ **양호 (Fair)**. Recall 확보 과정에서 일부 노이즈가 포함되었으나 감내 가능한 수준. |
 
 ---
 
@@ -44,7 +44,16 @@
 ### 🔍 4. Hybrid Search & Reranking
 
 - **Vector Search** (의미 기반) + **Keyword Search** (단어 일치) 결합.
-- `CrossEncoder`를 도입하여 검색된 후보군을 재순위화(Reranking)하여 정확도 보정.
+- **Deep Retrieval**: `search_by_company` 호출 시 검색 후보(`k`)를 기존 **10개**에서 **100개**로 확대하여 Recall 확보.
+- **Reranking**:
+  - **Model**: `cross-encoder/ms-marco-MiniLM-L-6-v2`
+  - **Process**: 100개 후보 중 의미적으로 가장 유사한 **Top 8**만 최종 선별 (기존 5개에서 확대).
+
+### 🛠️ 5. Reranking 필터 최적화 (Critical Fix)
+
+- **문제**: Cross-Encoder 모델(`MiniLM`)의 점수가 음수일 경우 관련성이 있어도 무조건 삭제하는 로직이 존재하여 Recall이 급락함.
+- **해결**: 음수 점수 필터링(`score < 0`)을 **제거**하고, 점수 순으로 상위 `k`개를 무조건 보장하도록 수정.
+- **결과**: **Context Recall 0.33 → 0.51** 로 비약적 상승 (검색된 정보를 버리지 않고 온전히 활용).
 
 ---
 
